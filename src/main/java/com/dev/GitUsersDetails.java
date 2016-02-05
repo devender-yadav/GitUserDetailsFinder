@@ -6,6 +6,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.dev.entity.UserDetail;
 import com.dev.util.Constants;
 import com.dev.util.RestUtil;
 import com.dev.util.UserType;
@@ -93,8 +94,44 @@ public class GitUsersDetails {
 		}
 
 		System.out.println("Email Ids of " + emailList.size() + " people are available.");
-
 		return emailList;
+	}
+
+	public static List<UserDetail> getUserDetails(List<String> userNameList) {
+
+		List<UserDetail> userDetailList = new ArrayList<>();
+
+		for (String userName : userNameList) {
+			
+			UserDetail userDetail = new UserDetail();
+			String resp = RestUtil.makeGETRequest(userName);
+			JSONObject jObject = new JSONObject(resp);
+
+			String name = (String) jObject.get("name");
+			String company = (String) jObject.get("company");
+			String location = (String) jObject.get("location");
+			String email = (String) jObject.get("email");
+
+			if (!name.equals("null")) {
+				userDetail.setName(name);
+			}
+			
+			if (!company.equals("null")) {
+				userDetail.setName(company);
+			}
+			
+			if (!location.equals("null")) {
+				userDetail.setName(location);
+			}
+			
+			if (!email.equals("null")) {
+				userDetail.setName(email);
+			}
+			
+			userDetailList.add(userDetail);
+		}
+		
+		return userDetailList;
 
 	}
 
@@ -118,7 +155,6 @@ public class GitUsersDetails {
 
 		String url = builder.toString();
 
-		System.out.println(url);
 		return url;
 	}
 
