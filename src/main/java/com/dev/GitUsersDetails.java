@@ -15,20 +15,15 @@ public class GitUsersDetails {
 	public static List<String> getGitUserNames(String orgName, String repoName, UserType userType) {
 
 		List<String> userNameList = new ArrayList<>();
-		String url = getRepoUrl(orgName, repoName) + Constants.FORWARD_SALSH + userType;
+		String url = getRepoUrl(orgName, repoName) + Constants.FORWARD_SALSH + userType.toString().toLowerCase();
 		String resp = "";
 		int pageNum = 1;
 		while (!resp.trim().equals("[]")) {
-
 			String modifiedUrl = url + "?page=" + pageNum + "&per_page=100";
-
-			System.out.println("##################################################################################");
 			System.out.println(modifiedUrl);
-			System.out.println("##################################################################################");
 			resp = RestUtil.makeGETRequest(modifiedUrl);
 
 			String usernameUrl = null;
-
 			JSONArray array = new JSONArray(resp);
 
 			for (int j = 0; j < array.length(); j++) {
@@ -47,7 +42,7 @@ public class GitUsersDetails {
 			pageNum++;
 		}
 
-		System.out.println("Total number of forks - " + userNameList.size());
+		System.out.println("Total number of " + userType + " - " + userNameList.size());
 		return userNameList;
 	}
 

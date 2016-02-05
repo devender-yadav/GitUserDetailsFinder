@@ -13,6 +13,7 @@ public class FileUtils {
 		Path file = Paths.get(filePath);
 		try {
 			Files.write(file, lines, Charset.forName("UTF-8"));
+			System.out.println("Check file:" + filePath);
 
 		} catch (IOException e) {
 			e.printStackTrace();
