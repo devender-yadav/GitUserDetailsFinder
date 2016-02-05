@@ -10,8 +10,6 @@ public class Test {
 		
 		List<String> userNameList = GitUsersDetails.getGitUserNames("impetus-opensource", "Kundera", UserType.FORKS);
 
-//		List<String> userNameList = GitUsersDetails.getGitUserNameForks("impetus-opensource", "Kundera");
-
 		List<String> emailIdList = GitUsersDetails.getGitEmailForks(userNameList);
 
 		FileUtils.createFile(emailIdList, "/home/impadmin/forkedUserList_" + System.currentTimeMillis());
