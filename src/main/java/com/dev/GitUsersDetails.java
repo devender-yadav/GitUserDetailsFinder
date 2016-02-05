@@ -36,9 +36,8 @@ public class GitUsersDetails {
 
 				if (userType.equals(UserType.FORKS)) {
 					usernameUrl = (String) jObject.getJSONObject("owner").get("url");
-				}
 
-				else {
+				} else {
 					usernameUrl = (String) jObject.get("url");
 				}
 
@@ -82,16 +81,13 @@ public class GitUsersDetails {
 		return userNameList;
 	}
 
-	public static List<String> getGitEmailForks(List<String> userNameList) {
+	public static List<String> getEmailIds(List<String> userNameList) {
 
 		List<String> emailList = new ArrayList<>();
 
 		for (String userName : userNameList) {
-
 			String resp = RestUtil.makeGETRequest(userName);
-
 			JSONObject jObject = new JSONObject(resp);
-
 			Object email = jObject.get("email");
 
 			if (email != null && !email.toString().equals("null")) {
@@ -101,7 +97,7 @@ public class GitUsersDetails {
 			}
 		}
 
-		System.out.println("Email Ids of " + emailList.size() + " people who forked your REPO are available.");
+		System.out.println("Email Ids of " + emailList.size() + " people are available.");
 
 		return emailList;
 
