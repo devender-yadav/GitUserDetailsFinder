@@ -42,6 +42,11 @@ public class UserDetail {
 		this.email = email;
 	}
 	
+
+	public String toString(){
+		return name+","+company+","+location+","+email;
+		
+	}
 	
 
 }

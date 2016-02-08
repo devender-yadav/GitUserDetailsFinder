@@ -8,131 +8,87 @@ import org.json.JSONObject;
 
 import com.dev.entity.UserDetail;
 import com.dev.util.Constants;
+import com.dev.util.ObjectUtil;
 import com.dev.util.RestUtil;
 import com.dev.util.UserType;
+import com.google.gson.Gson;
 
 public class GitUsersDetails {
 
-	public static List<String> getGitUserNames(String orgName, String repoName, UserType userType) {
+	public static List<String> getGitUserNames(String orgName, String repoName, UserType userType, String userName,
+			String password) {
 
-		List<String> userNameList = new ArrayList<>();
+		List<String> gitUserNameUrlList = new ArrayList<>();
 		String url = getRepoUrl(orgName, repoName) + Constants.FORWARD_SALSH + userType.toString().toLowerCase();
 		String resp = "";
 		int pageNum = 1;
 		while (!resp.trim().equals("[]")) {
 			String modifiedUrl = url + "?page=" + pageNum + "&per_page=100";
 			System.out.println(modifiedUrl);
-			resp = RestUtil.makeGETRequest(modifiedUrl);
 
-			String usernameUrl = null;
-			JSONArray array = new JSONArray(resp);
+			if (userName == null && password == null) {
+				resp = RestUtil.makeGETRequest(modifiedUrl);
+			} else {
+				resp = RestUtil.makeGETRequest(modifiedUrl, userName, password);
+			}
 
-			for (int j = 0; j < array.length(); j++) {
-				JSONObject jObject = array.getJSONObject(j);
+			String userNameUrl = null;
+			JSONArray jArray = new JSONArray(resp);
+
+			for (int j = 0; j < jArray.length(); j++) {
+				JSONObject jObject = jArray.getJSONObject(j);
 
 				if (userType.equals(UserType.FORKS)) {
-					usernameUrl = (String) jObject.getJSONObject("owner").get("url");
+					userNameUrl = (String) jObject.getJSONObject("owner").get("url");
 
 				} else {
-					usernameUrl = (String) jObject.get("url");
+					userNameUrl = (String) jObject.get("url");
 				}
 
-				System.out.println(usernameUrl);
-				userNameList.add(usernameUrl);
+				System.out.println(userNameUrl);
+				gitUserNameUrlList.add(userNameUrl);
 			}
 			pageNum++;
 		}
 
-		System.out.println("Total number of " + userType + " - " + userNameList.size());
-		return userNameList;
+		System.out.println("Total number of " + userType + " - " + gitUserNameUrlList.size());
+		return gitUserNameUrlList;
 	}
 
-	public static List<String> getGitUserNameForks(String orgName, String repoName) {
+	public static List<String> getGitUserNames(String orgName, String repoName, UserType userType) {
 
-		List<String> userNameList = new ArrayList<>();
-		String forkUrl = getRepoUrl(orgName, repoName) + Constants.FORWARD_SALSH + Constants.FORKS;
-		String resp = "";
-		int pageNum = 1;
-		while (!resp.trim().equals("[]")) {
+		return getGitUserNames(orgName, repoName, userType, null, null);
 
-			String modifiedUrl = forkUrl + "?page=" + pageNum + "&per_page=100";
-
-			System.out.println("##################################################################################");
-			System.out.println(modifiedUrl);
-			System.out.println("##################################################################################");
-			resp = RestUtil.makeGETRequest(modifiedUrl);
-
-			JSONArray array = new JSONArray(resp);
-
-			for (int j = 0; j < array.length(); j++) {
-				JSONObject jObject = array.getJSONObject(j);
-				String url = (String) jObject.getJSONObject("owner").get("url");
-				System.out.println(url);
-				userNameList.add(url);
-			}
-			pageNum++;
-		}
-
-		System.out.println("Total number of forks - " + userNameList.size());
-		return userNameList;
 	}
 
-	public static List<String> getEmailIds(List<String> userNameList) {
+	public static List<UserDetail> getUserDetails(List<String> userNameUrlList) {
 
-		List<String> emailList = new ArrayList<>();
+		return getUserDetails(userNameUrlList, null, null);
 
-		for (String userName : userNameList) {
-			String resp = RestUtil.makeGETRequest(userName);
-			JSONObject jObject = new JSONObject(resp);
-			Object email = jObject.get("email");
-
-			if (email != null && !email.toString().equals("null")) {
-				String emailId = (String) email;
-				System.out.println(emailId);
-				emailList.add(emailId);
-			}
-		}
-
-		System.out.println("Email Ids of " + emailList.size() + " people are available.");
-		return emailList;
 	}
 
-	public static List<UserDetail> getUserDetails(List<String> userNameList) {
+	public static List<UserDetail> getUserDetails(List<String> userNameUrlList, String userName, String password) {
 
 		List<UserDetail> userDetailList = new ArrayList<>();
 
-		for (String userName : userNameList) {
-			
-			UserDetail userDetail = new UserDetail();
-			String resp = RestUtil.makeGETRequest(userName);
+		for (String userNameUrl : userNameUrlList) {
+
+			String resp = "";
+
+			if (userName == null && password == null) {
+				resp = RestUtil.makeGETRequest(userNameUrl);
+			} else {
+				resp = RestUtil.makeGETRequest(userNameUrl, userName, password);
+			}
 			JSONObject jObject = new JSONObject(resp);
-
-			String name = (String) jObject.get("name");
-			String company = (String) jObject.get("company");
-			String location = (String) jObject.get("location");
-			String email = (String) jObject.get("email");
-
-			if (!name.equals("null")) {
-				userDetail.setName(name);
+			Gson gson = new Gson();
+			UserDetail userDetail = gson.fromJson(jObject.toString(), UserDetail.class);
+			if (ObjectUtil.checkNullAndEmpty(userDetail)) {
+				System.out.println(userDetail.toString());
+				userDetailList.add(userDetail);
 			}
-			
-			if (!company.equals("null")) {
-				userDetail.setName(company);
-			}
-			
-			if (!location.equals("null")) {
-				userDetail.setName(location);
-			}
-			
-			if (!email.equals("null")) {
-				userDetail.setName(email);
-			}
-			
-			userDetailList.add(userDetail);
 		}
-		
 		return userDetailList;
-
 	}
 
 	private static String getRepoUrl(String orgName, String repoName) {
