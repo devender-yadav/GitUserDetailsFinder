@@ -44,7 +44,7 @@ public class UserDetail {
 	
 
 	public String toString(){
-		return name+","+company+","+location+","+email;
+		return name+"#"+company+"#"+location+"#"+email;
 		
 	}
 	
