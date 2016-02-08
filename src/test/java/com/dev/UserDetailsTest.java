@@ -14,16 +14,10 @@ public class UserDetailsTest {
 	private static final String REPO_NAME = "GitUserDetails";
 
 	@Test
-	public void getForkedUserList() {
+	public void getSubscribersList() {
 
-		List<String> userNameList = GitUsersDetails.getGitUserNames(ORG_NAME, REPO_NAME, UserType.SUBSCRIBERS);
-
-		Assert.assertTrue(userNameList.size() > 0);
-
-		List<UserDetail> userDetailList = GitUsersDetails.getUserDetails(userNameList);
-
+		List<UserDetail> userDetailList = GitUsersDetails.getUserDetails(ORG_NAME, REPO_NAME, UserType.SUBSCRIBERS);
 		Assert.assertTrue(userDetailList.size() > 0);
-
 	}
 
 }

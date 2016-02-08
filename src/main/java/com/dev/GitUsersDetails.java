@@ -15,7 +15,40 @@ import com.google.gson.Gson;
 
 public class GitUsersDetails {
 
-	public static List<String> getGitUserNames(String orgName, String repoName, UserType userType, String userName,
+	public static List<UserDetail> getUserDetails(String orgName, String repoName, UserType userType, String userName,
+			String password) {
+
+		List<String> userNameUrlList = getGitUserNames(orgName, repoName, userType, userName, password);
+
+		List<UserDetail> userDetailList = new ArrayList<>();
+
+		for (String userNameUrl : userNameUrlList) {
+
+			String resp = "";
+
+			if (userName == null && password == null) {
+				resp = RestUtil.makeGETRequest(userNameUrl);
+			} else {
+				resp = RestUtil.makeGETRequest(userNameUrl, userName, password);
+			}
+			JSONObject jObject = new JSONObject(resp);
+			Gson gson = new Gson();
+			UserDetail userDetail = gson.fromJson(jObject.toString(), UserDetail.class);
+			if (ObjectUtil.checkNullAndEmpty(userDetail)) {
+				System.out.println(userDetail.toString());
+				userDetailList.add(userDetail);
+			}
+		}
+		return userDetailList;
+	}
+
+	public static List<UserDetail> getUserDetails(String orgName, String repoName, UserType userType) {
+
+		return getUserDetails(orgName, repoName, userType, null, null);
+
+	}
+
+	private static List<String> getGitUserNames(String orgName, String repoName, UserType userType, String userName,
 			String password) {
 
 		List<String> gitUserNameUrlList = new ArrayList<>();
@@ -53,42 +86,6 @@ public class GitUsersDetails {
 
 		System.out.println("Total number of " + userType + " - " + gitUserNameUrlList.size());
 		return gitUserNameUrlList;
-	}
-
-	public static List<String> getGitUserNames(String orgName, String repoName, UserType userType) {
-
-		return getGitUserNames(orgName, repoName, userType, null, null);
-
-	}
-
-	public static List<UserDetail> getUserDetails(List<String> userNameUrlList) {
-
-		return getUserDetails(userNameUrlList, null, null);
-
-	}
-
-	public static List<UserDetail> getUserDetails(List<String> userNameUrlList, String userName, String password) {
-
-		List<UserDetail> userDetailList = new ArrayList<>();
-
-		for (String userNameUrl : userNameUrlList) {
-
-			String resp = "";
-
-			if (userName == null && password == null) {
-				resp = RestUtil.makeGETRequest(userNameUrl);
-			} else {
-				resp = RestUtil.makeGETRequest(userNameUrl, userName, password);
-			}
-			JSONObject jObject = new JSONObject(resp);
-			Gson gson = new Gson();
-			UserDetail userDetail = gson.fromJson(jObject.toString(), UserDetail.class);
-			if (ObjectUtil.checkNullAndEmpty(userDetail)) {
-				System.out.println(userDetail.toString());
-				userDetailList.add(userDetail);
-			}
-		}
-		return userDetailList;
 	}
 
 	private static String getRepoUrl(String orgName, String repoName) {
