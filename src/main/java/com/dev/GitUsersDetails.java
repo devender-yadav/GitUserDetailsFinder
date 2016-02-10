@@ -3,15 +3,15 @@ package com.dev;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import com.dev.entity.UserDetail;
 import com.dev.util.Constants;
 import com.dev.util.ObjectUtil;
 import com.dev.util.RestUtil;
 import com.dev.util.UserType;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class GitUsersDetails {
 
@@ -31,7 +31,7 @@ public class GitUsersDetails {
 			} else {
 				resp = RestUtil.makeGETRequest(userNameUrl, userName, password);
 			}
-			JSONObject jObject = new JSONObject(resp);
+			JsonObject jObject = new JsonParser().parse(resp).getAsJsonObject();
 			Gson gson = new Gson();
 			UserDetail userDetail = gson.fromJson(jObject.toString(), UserDetail.class);
 			if (ObjectUtil.checkNullAndEmpty(userDetail)) {
@@ -66,16 +66,17 @@ public class GitUsersDetails {
 			}
 
 			String userNameUrl = null;
-			JSONArray jArray = new JSONArray(resp);
 
-			for (int j = 0; j < jArray.length(); j++) {
-				JSONObject jObject = jArray.getJSONObject(j);
+			JsonArray jArray = new JsonParser().parse(resp).getAsJsonArray();
+
+			for (int j = 0; j < jArray.size(); j++) {
+				JsonObject jObject = jArray.get(j).getAsJsonObject();
 
 				if (userType.equals(UserType.FORKS)) {
-					userNameUrl = (String) jObject.getJSONObject("owner").get("url");
+					userNameUrl = jObject.getAsJsonObject("owner").get("url").getAsString();
 
 				} else {
-					userNameUrl = (String) jObject.get("url");
+					userNameUrl = jObject.get("url").getAsString();
 				}
 
 				System.out.println(userNameUrl);
